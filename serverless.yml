@@ -1,0 +1,64 @@
+service:
+  name: aws-nodejs-typescript
+
+plugins:
+  - serverless-webpack
+
+custom:
+  connectionsTableName: connections-table
+
+provider:
+  name: aws
+  runtime: nodejs8.10
+  profile: amplify
+  timeout: 30
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:DescribeTable
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      # Restrict our IAM role permissions to
+      # the specific table for the stage
+      Resource:
+        - "Fn::GetAtt": [ConnectionsTable, Arn]
+
+resources:
+  Resources:
+    ConnectionsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.connectionsTableName}
+        AttributeDefinitions:
+          - AttributeName: connection
+            AttributeType: S
+        KeySchema:
+          - AttributeName: connection
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+
+functions:
+  connect:
+    handler: handler.connect
+    events:
+      - websocket: $connect
+    enviroment:
+      CONNECTIONS: ${self:custom.connectionsTableName}
+  disconnect:
+    handler: handler.disconnect
+    events:
+      - websocket: $disconnect
+    enviroment:
+      CONNECTIONS: ${self:custom.connectionsTableName}
+  defaultMessage:
+    handler: handler.message
+    events:
+      - websocket: $default
+    enviroment:
+      CONNECTIONS: ${self:custom.connectionsTableName}
