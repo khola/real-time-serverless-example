@@ -3,7 +3,7 @@ const ddb = new AWS.DynamoDB.DocumentClient();
 
 const connectionsTable = "connections-table";
 
-const deleteConnection = async connection =>
+const deleteConnection = connection =>
   ddb
     .delete({
       TableName: connectionsTable,
@@ -11,7 +11,7 @@ const deleteConnection = async connection =>
     })
     .promise();
 
-const addConnection = async connection =>
+const addConnection = connection =>
   ddb
     .put({
       TableName: connectionsTable,
@@ -21,8 +21,7 @@ const addConnection = async connection =>
     })
     .promise();
 
-const dbAvailableConnections = async () =>
-  await ddb.scan({ TableName: connectionsTable }).promise();
+const dbAvailableConnections = () => ddb.scan({ TableName: connectionsTable }).promise();
 
 export const connections = {
   delete: deleteConnection,
