@@ -7,7 +7,7 @@ const deleteConnection = connection =>
   ddb
     .delete({
       TableName: connectionsTable,
-      Key: { connection: connection }
+      Key: { connection }
     })
     .promise();
 
